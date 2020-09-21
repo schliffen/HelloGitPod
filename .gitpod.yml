@@ -1,4 +1,11 @@
+image:
+  file: .gitpod.Dockerfile
+
 tasks:
-- init: >
-    cmake -S. -Bbuild -DCMAKE_EXPORT_COMPILE_COMMANDS=ON &&
-    cmake --build build --target all 
+  - init: >
+      cmake -S. -Bbuild -DCMAKE_EXPORT_COMPILE_COMMANDS=ON && cmake --build
+      build --target all 
+
+vscode:
+  extensions:
+    - webfreak.debug@0.25.0:F9uLpAOde6r0l7rgMC8LTQ==
