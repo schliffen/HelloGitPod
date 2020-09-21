@@ -8,17 +8,21 @@ FROM gitpod/workspace-full
 
 ARG OPENCV_VERSION="3.0.0"
 
+USER gitpod
+
 # install dependencies
-RUN apt-get update
+# RUN apt-get update
 RUN apt-get install -y libopencv-dev yasm libjpeg-dev libjasper-dev libavcodec-dev libavformat-dev libswscale-dev libdc1394-22-dev libv4l-dev python-dev python-numpy libtbb-dev libqt4-dev libgtk2.0-dev libmp3lame-dev libopencore-amrnb-dev libopencore-amrwb-dev libtheora-dev libvorbis-dev libxvidcore-dev x264 v4l-utils pkg-config
 RUN apt-get install -y curl build-essential checkinstall cmake
 
+USER gitpod
 # download opencv
 RUN curl -sL https://github.com/Itseez/opencv/archive/$OPENCV_VERSION.tar.gz | tar xvz -C /tmp
 RUN mkdir -p /tmp/opencv-$OPENCV_VERSION/build
 
 WORKDIR /tmp/opencv-$OPENCV_VERSION/build
 
+USER gitpod
 # install
 RUN cmake -DWITH_FFMPEG=OFF -DWITH_OPENEXR=OFF -DBUILD_TIFF=OFF -DWITH_CUDA=OFF -DWITH_NVCUVID=OFF -DBUILD_PNG=OFF ..
 RUN make
@@ -34,6 +38,7 @@ RUN apt-get remove --purge -y curl build-essential checkinstall cmake
 RUN apt-get autoclean && apt-get clean
 RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+USER gitpod
 # prepare dir
 RUN mkdir /source
 
