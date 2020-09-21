@@ -11,7 +11,7 @@ ARG OPENCV_VERSION="3.0.0"
 USER gitpod
 
 # install dependencies
-# RUN apt-get update
+RUN sudo apt-get update
 # RUN apt-get install -y libopencv-dev yasm libjpeg-dev libjasper-dev libavcodec-dev libavformat-dev libswscale-dev libdc1394-22-dev libv4l-dev python-dev python-numpy libtbb-dev libqt4-dev libgtk2.0-dev libmp3lame-dev libopencore-amrnb-dev libopencore-amrwb-dev libtheora-dev libvorbis-dev libxvidcore-dev x264 v4l-utils pkg-config
 
 # USER gitpod
