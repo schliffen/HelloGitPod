@@ -1,59 +1,59 @@
-FROM gitpod/workspace-full
-
+# FROM gitpod/workspace-full
+FROM ubuntu:16.04
 # Install custom tools, runtimes, etc.
 # For example "bastet", a command-line tetris clone:
 # RUN brew install bastet
 #
 # More information: https://www.gitpod.io/docs/config-docker/
 
-ARG OPENCV_VERSION="3.0.0"
+# First: get all the dependencies:
+#
+RUN apt-get update
+RUN apt-get install -y cmake git libgtk2.0-dev pkg-config libavcodec-dev \
+libavformat-dev libswscale-dev python-dev python-numpy libtbb2 libtbb-dev \
+libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev unzip
 
-USER gitpod
+RUN apt-get install -y wget
 
-# install dependencies
-RUN sudo apt-get update
-RUN sudo apt-get install -y libopencv-dev yasm libjpeg-dev libjasper-dev libavcodec-dev libavformat-dev libswscale-dev libdc1394-22-dev libv4l-dev python-dev python-numpy libtbb-dev libqt4-dev libgtk2.0-dev libmp3lame-dev libopencore-amrnb-dev libopencore-amrwb-dev libtheora-dev libvorbis-dev libxvidcore-dev x264 v4l-utils pkg-config
+# Just get a simple editor for convienience (you could just cancel this line)
+RUN apt-get install -y vim
 
-# USER gitpod
-RUN sudo apt-get install -y curl build-essential checkinstall cmake
 
-#USER gitpod
-# download opencv
-RUN curl -sL https://github.com/Itseez/opencv/archive/$OPENCV_VERSION.tar.gz | tar xvz -C /tmp
-# #USER gitpod
-RUN mkdir -p /tmp/opencv-$OPENCV_VERSION/build
+# Second: get and build OpenCV 3.2
+#
+RUN cd \
+    && wget https://github.com/opencv/opencv/archive/3.2.0.zip \
+    && unzip 3.2.0.zip \
+    && cd opencv-3.2.0 \
+    && mkdir build \
+    && cd build \
+    && cmake .. \
+    && make -j8 \
+    && make install \
+    && cd \
+    && rm 3.2.0.zip
 
-# #USER gitpod
-WORKDIR /tmp/opencv-$OPENCV_VERSION/build
 
-# #USER gitpod
-# # install
-RUN cmake -DWITH_FFMPEG=OFF -DWITH_OPENEXR=OFF -DBUILD_TIFF=OFF -DWITH_CUDA=OFF -DWITH_NVCUVID=OFF -DBUILD_PNG=OFF ..
-USER gitpod
-RUN make
-# #USER gitpod
-RUN make install
+# Third: install and build opencv_contrib
+#
+RUN cd \
+    && wget https://github.com/opencv/opencv_contrib/archive/3.2.0.zip \
+    && unzip 3.2.0.zip \
+    && cd opencv-3.2.0/build \
+    && cmake -DOPENCV_EXTRA_MODULES_PATH=../../opencv_contrib-3.2.0/modules/ .. \
+    && make -j8 \
+    && make install \
+    && cd ../.. \
+    && rm 3.2.0.zip
 
-# # configure
-# #USER gitpod
-RUN echo "/usr/local/lib" > /etc/ld.so.conf.d/opencv.conf
-# #USER gitpod
-RUN ldconfig
-# #USER gitpod
-RUN ln /dev/null /dev/raw1394 # hide warning - http://stackoverflow.com/questions/12689304/ctypes-error-libdc1394-error-failed-to-initialize-libdc1394
 
-# # cleanup package manager
-# #USER gitpod
-RUN sudo apt-get remove --purge -y curl build-essential checkinstall cmake
-# #USER gitpod
-RUN sudo apt-get autoclean && apt-get clean
-# #USER gitpod
-RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-# #USER gitpod
-# prepare dir
-RUN mkdir /source
-
-VOLUME ["/source"]
-WORKDIR /source
-CMD ["bash"]
+# Forth: get and build the Learning OpenCV 3 examples:
+#    I copy the needed data to where the executables will be: opencv-3.2.0/build/bin
+#
+RUN cd \
+    && git clone https://github.com/oreillymedia/Learning-OpenCV-3_examples.git \
+    && cd Learning-OpenCV-3_examples \
+    && mkdir build \
+    && cd build \
+    && cmake .. \
+    && make -j8
